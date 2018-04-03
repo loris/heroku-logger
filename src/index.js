@@ -2,6 +2,7 @@
 const Logfmt = require('logfmt')
 const chalk = require('chalk')
 const flatten = require('flat')
+const figures = require('figures')
 
 /**
  * Environment variables, with a client-side guard.
@@ -44,6 +45,19 @@ const COLORS = {
   info: chalk.blue,
   warn: chalk.yellow,
   error: chalk.red,
+}
+
+/**
+ * Log level icons.
+ *
+ * @type {Object}
+ */
+
+const ICONS = {
+  debug: figures('…'),
+  info: figures('ℹ'),
+  error: figures('✖'),
+  warn: figures('⚠'),
 }
 
 /**
@@ -152,16 +166,17 @@ class Logger {
     const flat = flatten(data, { delimiter })
     const ctx = { ...flat, level, message }
     const string = logfmt.stringify(ctx)
+    const icon = ICONS[level] || figures('❯')
 
     if (readable && color) {
-      const tag = `${COLORS[level](`[${level}]`)}`
+      const tag = `${COLORS[level](`${icon} ${level}`)}`
       const msg = value > 3 ? chalk.red(message) : message
       const obj = `${chalk.gray(string)}`
-      return `${tag} ${msg} ${obj}`
+      return `${tag}\t${msg} ${obj}`
     }
 
     else if (readable) {
-      return `[${level}] ${message} ${string}`
+      return `${icon} ${level}\t${message} ${string}`
     }
 
     else {
